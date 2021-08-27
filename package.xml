@@ -1,5 +1,5 @@
 <package>
-  <name>decision_auto</name>
+  <name>total_control</name>
   <version>0.1.0</version>
   <description>
       If your robot loses connection to the base station it will stop motors or navigate home.
