@@ -3,48 +3,37 @@ import rospy
 import time
 from std_msgs.msg import *
 from geometry_msgs.msg import Twist
-import random
-import datetime
 
-testing = 0
+def obstacles (depths):
+	depthsStr = str(depths.data)
+	depthsArray = depthsStr.split("|")
+	depthsArray.pop()
+	menor = depthsArray[0]
+	for elemento in depthsArray:
+		if elemento < menor:
+			menor = elemento
+	if(float(menor) > 1):
+		pub.publish("200-" + str(menor))
+		pubde.publish("0")
+	else:
+		pub.publish(str(depthsArray.index(menor)) + "-" + str(menor))
+		pubde.publish("1")
 
-def controlTotal (comando):
-	instruction = str(comando.data)
-	if(instruction == "0"):
-		nav_auto_pub.publish("0")
-	elif(instruction == "1"):
-		nav_auto_pub.publish("1")
-
-def test (comando2):
-	global testing
-	instruction2 = str(comando2.data)
-	if(instruction2 == "1"):
-		testing = "1"
-		while(testing == "1"):
-			for y in range(20):
-				string_test = ""
-				for x in range(9):
-					random.seed(datetime.datetime.now())
-					string_rand = random.uniform(6.1, 8)
-					string_test = string_test + str(string_rand) + "|"
-				nav_auto_pub_test.publish(string_test)
-				time.sleep(0.5)
-			for y in range(20):
-				string_test = ""
-				for x in range(9):
-					random.seed(datetime.datetime.now())
-					string_rand = random.uniform(4, 7)
-					string_test = string_test + str(string_rand) + "|"
-				nav_auto_pub_test.publish(string_test)
-				time.sleep(0.5)
-	elif(instruction2 == "0"):
-		testing = "0"
-
-nav_auto_pub = rospy.Publisher('/flag/nav_auto',String,queue_size = 10)
-nav_auto_pub_test = rospy.Publisher('/nav/depths',String,queue_size = 10)
+pub = rospy.Publisher('/nav/obstacle',String,queue_size = 10)
+pubde = rospy.Publisher('detection', String, queue_size = 10)
 def main():
 	rospy.init_node("decision_auto")
-	sub = rospy.Subscriber('/total_control/nav_auto',String, controlTotal)
-	sub_test = rospy.Subscriber('/total_control/test',String, test)
-	rate = rospy.Rate(5)
+	sub = rospy.Subscriber('/nav/depths',String, obstacles)
+	# depths = "2.00|2.13|2.42|2.43|1.9|1.85|1.00|1.40|2.13|"
+	# depthsArray = depths.split("|")
+	# depthsArray.pop()
+	# menor = depthsArray[0]
+	# for elemento in depthsArray:
+	# 	if elemento < menor:
+	# 		menor = elemento
+	# obstacle = str(depthsArray.index(menor)) + "-" + str(menor)
+	# print(obstacle)
+	# print(depthsArray)
+	rate = rospy.Rate(2)
 	rospy.spin()
+
